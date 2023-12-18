@@ -4,8 +4,6 @@
 // } = require("../utils/mongoose");
 const User = require("../models/users");
 const bcrypt = require("bcrypt");
-var salt = bcrypt.genSaltSync(10);
-const fileUpload = require("../configs/Cloudinary/index");
 
 const userController = {
   getAll: async (req, res, next) => {
@@ -17,22 +15,25 @@ const userController = {
   },
 
   signUp: async (req, res, next) => {
+    console.log(req.body);
     const checkUser = await User.find({ email: req.body.email });
 
     if (checkUser.length > 0) {
       res.json({ code: 400, message: "Email already exists !" });
     } else {
+      var salt = await bcrypt.genSalt(10);
+
       try {
         const newUser = new User({
           fullname: req.body.fullname,
           email: req.body.email,
           createdAt: req.body.createdAt,
-          imageURL: req.file.path,
+          imageURL: req.body.image,
           address: req.body.address,
           phone: req.body.phone,
           files: req.body.files,
           messageList: req.body.messageList,
-          password: bcrypt.hashSync(req.body.password, salt),
+          password: bcrypt.hash(req.body.password, salt),
         });
         await newUser.save();
         res.json({
@@ -44,6 +45,7 @@ const userController = {
           code: 400,
           message: error,
         });
+        console.log(error);
       }
     }
   },

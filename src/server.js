@@ -5,16 +5,21 @@ const route = require("./routes");
 const port = 3000;
 const cors = require("cors");
 var app = express();
+const multer = require("multer");
+
 //cors
 app.use(cors());
-
 //connect to db
 db.connect();
-//body-parser
+//body-paser
+// app.use(bodyParser.json());
 app.use(require("body-parser").urlencoded({ extended: true }));
+app.use(require("body-parser").json({ extended: true }));
+
 //static file
 app.use(express.static(path.join(__dirname, "public")));
 //middleware
+// app.use(upload.none());
 app.use(
   express.urlencoded({
     extended: true,
