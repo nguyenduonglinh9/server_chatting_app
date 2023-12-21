@@ -1,7 +1,11 @@
 const usersRouter = require("../routes/users");
 const authenRouter = require("../routes/authentication");
+const validationRouter = require("../routes/validation");
 const fileUpload = require("../configs/Cloudinary/index");
 const route = (app) => {
+  //validation
+  app.use("/validation", validationRouter);
+  //use
   app.use("/users", usersRouter);
   //authentication
   app.use("/authentication", authenRouter);

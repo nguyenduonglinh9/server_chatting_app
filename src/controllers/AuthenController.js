@@ -15,38 +15,33 @@ const userController = {
   },
 
   signUp: async (req, res, next) => {
-    console.log(req.body);
-    const checkUser = await User.find({ email: req.body.email });
+    console.log(req.body.password);
+    var salt = await bcrypt.genSalt(10);
+    var myEncrpytedPass = await bcrypt.hash(req.body.password, salt);
 
-    if (checkUser.length > 0) {
-      res.json({ code: 400, message: "Email already exists !" });
-    } else {
-      var salt = await bcrypt.genSalt(10);
-
-      try {
-        const newUser = new User({
-          fullname: req.body.fullname,
-          email: req.body.email,
-          createdAt: req.body.createdAt,
-          imageURL: req.body.image,
-          address: req.body.address,
-          phone: req.body.phone,
-          files: req.body.files,
-          messageList: req.body.messageList,
-          password: bcrypt.hash(req.body.password, salt),
-        });
-        await newUser.save();
-        res.json({
-          code: 200,
-          message: "success",
-        });
-      } catch (error) {
-        res.json({
-          code: 400,
-          message: error,
-        });
-        console.log(error);
-      }
+    try {
+      const newUser = new User({
+        fullname: req.body.fullname,
+        email: req.body.email,
+        createdAt: req.body.createdAt,
+        imageURL: req.body.image,
+        address: req.body.address,
+        phone: req.body.phone,
+        files: req.body.files,
+        messageList: req.body.messageList,
+        password: myEncrpytedPass,
+      });
+      await newUser.save();
+      res.json({
+        code: 200,
+        message: "success",
+      });
+    } catch (error) {
+      res.json({
+        code: 400,
+        message: error,
+      });
+      console.log("LỖI" + error);
     }
   },
 

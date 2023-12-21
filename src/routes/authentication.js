@@ -1,10 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const authenController = require("../controllers/AuthenController");
-const fileUpload = require("../configs/Cloudinary/index");
-
-var multer = require("multer");
-const upload = multer();
 // const middleWareAuth = require("../middlewares/auth");
 
 // router.use("/update/:id", middleWareAuth, userController.updateUser);
