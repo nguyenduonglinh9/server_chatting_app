@@ -9,6 +9,7 @@ const userSchema = new Schema({
   address: { type: String },
   phone: { type: String },
   password: { type: String },
+  code: { type: String },
   files: { type: Array },
   messageList: { type: Array },
 });
