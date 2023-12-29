@@ -41,6 +41,7 @@ const userController = {
         phone: req.body.phone,
         files: req.body.files,
         messageList: req.body.messageList,
+        type: "social",
       });
       await newUser.save();
       res.json({
@@ -73,6 +74,7 @@ const userController = {
             ? null
             : await bcrypt.hash(req.body.password, salt),
         code: code.toLowerCase(),
+        type: "default",
       });
       await newUser.save();
       const access_token = jwt.sign(
@@ -129,6 +131,23 @@ const userController = {
       } else {
         res.json({ code: 400, message: "Authentication code is incorrect" });
       }
+    }
+  },
+
+  loginDefault: async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email, type: "default" });
+    if (user) {
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (validPassword) {
+        res.json({ code: 200, message: "Logged in successfully" });
+      } else {
+        res.json({ code: 400, message: "Incorrect email or password" });
+      }
+    } else {
+      res.json({ code: 400, message: "Incorrect email or password" });
     }
   },
 };

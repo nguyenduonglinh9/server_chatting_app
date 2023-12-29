@@ -13,6 +13,7 @@ const userSchema = new Schema({
   code: { type: String },
   files: { type: Array },
   messageList: { type: Array },
+  type: { type: String },
 });
 
 module.exports = mongoose.model("user", userSchema);

@@ -7,6 +7,7 @@ const authenController = require("../controllers/AuthenController");
 // router.use("/admin", middleWareAuth, userController.getAdmin);
 // router.use("/staff", middleWareAuth, userController.getStaff);
 // router.use("/:id", middleWareAuth, userController.getOne);
+router.use("/login", authenController.loginDefault);
 router.use("/social", authenController.socialAuthen);
 router.use("/verity", authenController.validationCode);
 router.use("/signup", authenController.signUp);

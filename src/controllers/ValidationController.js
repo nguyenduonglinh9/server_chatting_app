@@ -11,7 +11,7 @@ const validationController = {
     if (checkEmail) {
       res.json({ code: 400, message: "This email has been registered" });
     } else {
-      res.json({ code: 200, message: "" });
+      res.json({ code: 200, message: "This email is not registered" });
     }
   },
   validationSocial: async (req, res, next) => {
