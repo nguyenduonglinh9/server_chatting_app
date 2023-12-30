@@ -6,7 +6,11 @@ const User = require("../models/users");
 
 const validationController = {
   validationEmail: async (req, res, next) => {
-    const checkEmail = await User.findOne({ email: req.params.email });
+    const requestEmail = req.params.email;
+    const checkEmail = await User.findOne({
+      email: requestEmail.toLowerCase(),
+      type: "default",
+    });
 
     if (checkEmail) {
       res.json({ code: 400, message: "This email has been registered" });
