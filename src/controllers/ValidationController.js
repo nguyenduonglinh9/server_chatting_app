@@ -1,7 +1,3 @@
-// const {
-//   multipleMongooseToObject,
-//   mongooseToObject,
-// } = require("../utils/mongoose");
 const User = require("../models/users");
 
 const validationController = {

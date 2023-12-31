@@ -47,7 +47,6 @@ const userController = {
       res.json({
         code: 200,
         message: "success",
-        // access_token: access_token,
       });
     } catch (error) {
       res.json({
@@ -137,7 +136,10 @@ const userController = {
   },
 
   loginDefault: async (req, res, next) => {
-    const user = await User.findOne({ email: req.body.email, type: "default" });
+    const user = await User.findOne({
+      email: req.body.email.toLowerCase(),
+      type: "default",
+    });
     if (user) {
       const validPassword = await bcrypt.compare(
         req.body.password,
