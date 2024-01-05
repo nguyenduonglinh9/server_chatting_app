@@ -29,7 +29,8 @@ const userController = {
       .catch((err) => next(err));
   },
 
-  socialAuthen: async (req, res, next) => {
+  socialSignUp: async (req, res, next) => {
+    const code = Math.random().toString(36).substring(3, 9);
     try {
       const newUser = new User({
         socialid: req.body.socialid,
@@ -41,13 +42,37 @@ const userController = {
         phone: req.body.phone,
         files: req.body.files,
         messageList: req.body.messageList,
-        type: "social",
+        code: code,
+        type: req.body.type,
       });
       await newUser.save();
       res.json({
         code: 200,
-        message: "success",
+        message: "Account successfully created",
+        infor: newUser,
       });
+
+      if (req.body.type == "google") {
+        var mailOptions = {
+          from: ' "Contact Support" <ndlcompany335@gmail.com>',
+          to: req.body.email,
+          subject: "Registration authentication code",
+          html: `
+        <div>
+         <p style="width:fit-content;margin:10px auto">This is your authentication code, please do not share it with anyone</p>
+         <div style="display:flex;justify-content:center;margin:10px 0px"><img style="width:70%;margin:auto" src="https://blog.cdn.cmarix.com/blog/wp-content/uploads/2021/02/Why-it-is-Best-time-to-launch-an-app-like-whatsapp-1.png" alt="Italian Trulli"></div>
+         <h1 style="color:red;margin:10px auto; width:fit-content">${code.toUpperCase()}</h1>
+        </div>
+        `,
+        };
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log("lỗi : " + error);
+          } else {
+            console.log("Email sent: " + info.response);
+          }
+        });
+      }
     } catch (error) {
       res.json({
         code: 400,
@@ -55,7 +80,7 @@ const userController = {
       });
     }
   },
-  signUp: async (req, res, next) => {
+  defaultsignUp: async (req, res, next) => {
     var salt = await bcrypt.genSalt(10);
     code = Math.random().toString(36).substring(3, 9);
     try {
@@ -76,19 +101,10 @@ const userController = {
         type: "default",
       });
       await newUser.save();
-      const access_token = jwt.sign(
-        {
-          email: req.body.email,
-          fullname: req.body.fullname,
-          createdAt: req.body.createdAt,
-          imageURL: req.body.image,
-        },
-        keys.access_token_secret
-      );
       res.json({
         code: 200,
-        message: "success",
-        // access_token: access_token,
+        message: "Account successfully created",
+        infor: newUser,
       });
       var mailOptions = {
         from: ' "Contact Support" <ndlcompany335@gmail.com>',
@@ -118,11 +134,64 @@ const userController = {
     }
   },
 
-  validationCode: async (req, res, next) => {
+  loginDefault: async (req, res, next) => {
     const user = await User.findOne({
       email: req.body.email.toLowerCase(),
       type: "default",
     });
+    if (user) {
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (validPassword) {
+        const access_token = jwt.sign(
+          {
+            email: user.email,
+            fullname: user.fullname,
+            createdAt: user.createdAt,
+            imageURL: user.image,
+          },
+          keys.access_token_secret
+        );
+        res.json({
+          code: 200,
+          message: "Logged in successfully",
+          infor: user,
+          access_token: access_token,
+        });
+      } else {
+        res.json({ code: 400, message: "Incorrect email or password" });
+      }
+    } else {
+      res.json({ code: 400, message: "Incorrect email or password" });
+    }
+  },
+  loginSocial: async (req, res, next) => {
+    const user = await User.findOne({ socialid: req.body.socialid });
+
+    if (user) {
+      const access_token = jwt.sign(
+        {
+          email: user.socialid,
+          fullname: user.fullname,
+          createdAt: user.createdAt,
+          imageURL: user.image,
+        },
+        keys.access_token_secret
+      );
+      res.json({
+        code: 200,
+        message: "Logged in successfully",
+        infor: user,
+        access_token: access_token,
+      });
+    } else {
+      res.json({ code: 400, message: "Account does not exist" });
+    }
+  },
+  validationCode: async (req, res, next) => {
+    const user = await User.findById(req.body.userID);
     if (user) {
       if (user.code == req.body.code.toLowerCase()) {
         res.json({
@@ -135,32 +204,11 @@ const userController = {
     }
   },
 
-  loginDefault: async (req, res, next) => {
-    const user = await User.findOne({
-      email: req.body.email.toLowerCase(),
-      type: "default",
-    });
-    if (user) {
-      const validPassword = await bcrypt.compare(
-        req.body.password,
-        user.password
-      );
-      if (validPassword) {
-        res.json({ code: 200, message: "Logged in successfully" });
-      } else {
-        res.json({ code: 400, message: "Incorrect email or password" });
-      }
-    } else {
-      res.json({ code: 400, message: "Incorrect email or password" });
-    }
-  },
-
   forgotpassword: async (req, res, next) => {
     const code = Math.random().toString(36).substring(3, 9);
-    const filter = { email: req.body.email.toLowerCase(), type: "default" };
     try {
-      const user = await User.findOneAndUpdate(
-        filter,
+      const user = await User.findByIdAndUpdate(
+        req.body.userID,
         { code: code },
         { new: true }
       );
@@ -188,16 +236,8 @@ const userController = {
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          res.json({
-            code: 400,
-            message: error,
-          });
           console.log("lỗi : " + error);
         } else {
-          res.json({
-            code: 200,
-            message: "Email sent: " + info.response,
-          });
           console.log("Email sent: " + info.response);
         }
       });
@@ -233,6 +273,8 @@ const userController = {
       });
     }
   },
+
+  sendMail: async (req, res, next) => {},
 };
 
 module.exports = userController;
