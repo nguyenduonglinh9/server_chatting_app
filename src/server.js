@@ -6,7 +6,6 @@ const port = 3000;
 const cors = require("cors");
 var app = express();
 const multer = require("multer");
-
 //cors
 app.use(cors());
 //connect to db

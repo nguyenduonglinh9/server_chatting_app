@@ -14,6 +14,7 @@ const userSchema = new Schema({
   files: { type: Array },
   messageList: { type: Array },
   type: { type: String },
+  friends: { type: Array },
 });
 
 module.exports = mongoose.model("user", userSchema);
