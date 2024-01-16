@@ -7,7 +7,7 @@ const verifyToken = (req, res, next) => {
   if (!authHeader) {
     return res.json({
       code: 401,
-      message: "Lỗi Truyền Request từ Client Vui Lòng Kiểm Tra Lại !",
+      message: "Unable to authenticate",
     });
   } else {
     try {
